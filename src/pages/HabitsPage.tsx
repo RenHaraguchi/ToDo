@@ -1,5 +1,17 @@
 import { useState, type FormEvent } from "react";
+import HabitCard from "../components/HabitCard";
 import type { Habit } from "../types";
+
+function daysDiffFromToday(iso: string): number | null {
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return null;
+    const toLocalMidnight = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const today = toLocalMidnight(new Date());
+    const target = toLocalMidnight(new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])));
+    const diffMs = today.getTime() - target.getTime();
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    return Math.round(diffMs / ONE_DAY);
+}
 
 export default function HabitsPage() {
     const [habits, setHabits] = useState<Habit[]>([]);
@@ -9,25 +21,35 @@ export default function HabitsPage() {
         e.preventDefault();
         const v = name.trim();
         if (!v) return;
-        setHabits(prev => [...prev, { id: Date.now(), name: v, doneToday: false }]);
+        setHabits(prev => [...prev, { id: Date.now(), name: v, history: Array(28).fill(false) }]);
         setName("");
     }
-    function toggleToday(id: number) {
-        setHabits(prev => prev.map(h => (h.id === id ? { ...h, doneToday: !h.doneToday } : h)));
-    }
-    function removeHabit(id: number) {
-        setHabits(prev => prev.filter(h => h.id !== id));
+
+    function markByDate(habitId: number) {
+        const input = prompt("達成した日付を YYYY-MM-DD で入力（例: 2025-10-19）");
+        if (!input) return;
+        const diff = daysDiffFromToday(input);
+        if (diff == null) return alert("フォーマットは YYYY-MM-DD です。");
+        if (diff < 0 || diff > 27) return alert("直近28日（今日含む）だけ指定できます。");
+
+        setHabits(prev =>
+            prev.map(h =>
+                h.id !== habitId
+                    ? h
+                    : { ...h, history: h.history.map((d, i) => (i === diff ? true : d)) }
+            )
+        );
     }
 
     return (
         <div className="w-full">
-            <h2 className="text-2xl font-bold mb-6">Habit</h2>
+            <h2 className="text-2xl font-bold mb-6">習慣トラッカー</h2>
 
-            <form onSubmit={addHabit} className="flex gap-2 mb-3" aria-label="習慣追加フォーム">
+            <form onSubmit={addHabit} className="flex gap-2 mb-4" aria-label="習慣追加フォーム">
                 <input
                     value={name}
                     onChange={e => setName(e.target.value)}
-                    placeholder="例）英単語30語、10分瞑想、腕立て20回"
+                    placeholder="例）5分筋トレ、2km走る、5分勉強、5分読書"
                     className="flex-1 px-2.5 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-sky-400"
                 />
                 <button
@@ -39,26 +61,19 @@ export default function HabitsPage() {
                 </button>
             </form>
 
-            <ul className="grid gap-2">
+            <div className="grid grid-cols-4 gap-4">
                 {habits.map(h => (
-                    <li key={h.id} className="flex items-center justify-between bg-gray-100 border border-gray-200 rounded-xl px-3 py-2">
-                        <label className="flex items-center gap-3">
-                            <input type="checkbox" checked={h.doneToday} onChange={() => toggleToday(h.id)} />
-                            <span>{h.name}</span>
-                        </label>
-                        <button
-                            onClick={() => removeHabit(h.id)}
-                            className="px-1.5 leading-none text-sm text-slate-600 hover:text-red-600"
-                            aria-label={`${h.name} を削除`}
-                        >
-                            削除
-                        </button>
-                    </li>
+                    <HabitCard
+                        key={h.id}
+                        name={h.name}
+                        history={h.history}
+                        onClickCard={() => markByDate(h.id)}
+                    />
                 ))}
-            </ul>
+            </div>
 
             {habits.length === 0 && (
-                <p className="text-sm text-gray-500">まずは上のフォームから習慣を追加してみましょう。</p>
+                <p className="text-sm text-gray-500 mt-2">まずは上のフォームから習慣を追加してみましょう。</p>
             )}
         </div>
     );

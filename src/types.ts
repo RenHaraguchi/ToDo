@@ -8,5 +8,11 @@ export type Todo = {
 export type Habit = {
     id: number;
     name: string;
-    doneToday: boolean; 
+    history: boolean[]; 
+};
+
+export type HabitCardProps = {
+    name: string;
+    history: boolean[];       
+    onClickCard: () => void;  
 };
