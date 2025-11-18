@@ -2,9 +2,10 @@ import { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import TasksPage from './pages/TasksPage';
 import HabitsPage from './pages/HabitsPage';
+import ViewPage from './pages/ViewPage';
 
 export default function App(){
-  const [page, setPage] = useState<"tasks" | "habits">("tasks");
+  const [page, setPage] = useState<"tasks" | "habits" | "view">("tasks");
 
   return (
     <div className = "min-h-screen grid grid-cols-10 bg-white text-slate-900">
@@ -12,7 +13,13 @@ export default function App(){
         <Sidebar page={page} onNavigate={setPage} />
       </aside>
       <main className="col-span-8 p-6">
-        {page === "tasks" ? <TasksPage /> : <HabitsPage />}
+        {page === "tasks" ? (
+          <TasksPage />
+        ) : page === "habits" ? (
+          <HabitsPage />
+        ) :  (
+          <ViewPage/>
+        )}
       </main>
     </div>
   );

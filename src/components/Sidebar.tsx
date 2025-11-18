@@ -1,13 +1,13 @@
 type Props = {
-    page: "tasks" | "habits";
-    onNavigate: (p: "tasks" | "habits") => void;
+    page: "tasks" | "habits" | "view";
+    onNavigate: (p: "tasks" | "habits" | "view") => void;
 };
 
 export default function Sidebar({ page, onNavigate }: Props) {
     return (
         <nav className="border-r border-gray-200">
             <h1 className="text-2xl font-semibold mb-10">My Productivity</h1>
-            {/* <nav>
+            <nav>
                 <h2 className="mb-2">表示</h2>
                 <button
                     className={
@@ -20,7 +20,7 @@ export default function Sidebar({ page, onNavigate }: Props) {
                 >
                     ToDo
                 </button>
-            </nav> */}
+            </nav>
             <nav className="grid gap-2">
                 <h2>入力</h2>
                 <button
