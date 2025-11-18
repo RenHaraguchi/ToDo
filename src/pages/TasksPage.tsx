@@ -1,9 +1,11 @@
 import { useState, type FormEvent } from "react";
 import type { Todo } from "../types";
 import DueDatePicker from "../components/DueDatePicker";
+import { useAppStore } from "../app-store/context";
+
 
 export default function TasksPage() {
-    const [todos, setTodos] = useState<Todo[]>([]);
+    const { todos, setTodos } = useAppStore();
     const [text, setText] = useState('');
     const [due, setDue] = useState('');
 
@@ -73,30 +75,30 @@ export default function TasksPage() {
 
             <ul className="todo-list">
                 {sortedTodos.map((todo) => (
-                    <li key={todo.id} className="todo-item bg-slate-100 rounded-lg p-3 mb-2 flex justify-between border-2">
-                        <label>
+                    <li key={todo.id} className="todo-item bg-slate-100 rounded-lg p-3 mb-2 flex items-center border-2">
+                        <label className="flex-1 min-w-0">
                             <input
                                 type="checkbox"
                                 checked={todo.done}
                                 onChange={() => toggle(todo.id)}
                                 aria-label={`${todo.text} を${todo.done ? '未完了' : '完了'}にする`}
-                                className="mr-3"
+                                className="mr-3 align-middle"
                             />
                             <span className={todo.done ? 'done' : ''}>{todo.text}</span>
                         </label>
-                        <DueDatePicker
-                            value={todo.due ?? ""}
-                            onChange={(v) => updateDue(todo.id, v)}  // 選択したら即反映
-                            min={today}
-                            // ← 見た目は今までの“小さめのピル”と同じ色分け
-                            className={
-                                'inline-flex items-center rounded px-2 py-0.5 text-[11px] ' +
-                                (todo.due
-                                    ? (isOverdue(todo) ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600')
-                                    : 'bg-gray-100 text-gray-600')
-                            }
-                        />
-                        <div className="gap-2 pl-3">
+                        <div className="ml-3 shrink-0 flex items-center gap-2">
+                            <DueDatePicker
+                                value={todo.due ?? ""}
+                                onChange={(v) => updateDue(todo.id, v)}  // 選択したら即反映
+                                min={today}
+                                // ← 見た目は今までの“小さめのピル”と同じ色分け
+                                className={
+                                    'inline-flex items-center rounded px-2 py-0.5 text-[11px] ' +
+                                    (todo.due
+                                        ? (isOverdue(todo) ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-600')
+                                        : 'bg-gray-100 text-gray-600')
+                                }
+                            />
                             <button
                                 onClick={() => remove(todo.id)}
                                 aria-label={`${todo.text} を削除`}
