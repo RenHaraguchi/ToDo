@@ -1,7 +1,8 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import type { Todo } from "../types";
 import DueDatePicker from "../components/DueDatePicker";
 import { useAppStore } from "../app-store/context";
+import { useFirebase } from "../hooks/useFirebase";
 
 
 export default function TasksPage() {
@@ -9,7 +10,19 @@ export default function TasksPage() {
     const [text, setText] = useState('');
     const [due, setDue] = useState('');
 
+    const { fetchTodos } = useFirebase();
+
     const today = new Date().toISOString().slice(0, 10);
+
+    useEffect(() => {
+        const load = async () => {
+            // if(todos.length > 0) return; 
+            const data = await fetchTodos();
+            setTodos(data);
+        }
+        load();
+    }, [fetchTodos, setTodos, todos.length]);
+
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();

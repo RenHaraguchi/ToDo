@@ -1,4 +1,4 @@
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import HabitCard from "../components/HabitCard";
 import type { Habit } from "../types";
 
@@ -6,6 +6,9 @@ import { useAppStore } from "../app-store/context";
 import { Button } from "../components/ui/button";
 import { Calendar } from "../components/ui/calendar";
 import { ja } from "date-fns/locale";
+
+import { useFirebase } from "../hooks/useFirebase";
+
 
 function dateToYmd(d?: Date) {
     if (!d) return "";
@@ -38,6 +41,8 @@ export default function HabitsPage() {
     const [isOpen, setIsOpen] = useState(false);
     const [targetHabitId, setTargetHabitId] = useState<number | null>(null);
 
+    const { fetchHabits } = useFirebase();
+
     const { today0, earliest0 } = useMemo(() => {
 
         const t0 = toLocalMidnight(new Date());
@@ -45,6 +50,16 @@ export default function HabitsPage() {
         e0.setDate(e0.getDate() - 27);
         return { today0: t0, earliest0: e0 };
     }, []);
+
+    useEffect(() => {
+        const load = async () => {
+            // if(habits.length > 0) return; 
+            const data = await fetchHabits();
+            setHabits(data);
+        }
+        load();
+    }, [fetchHabits, setHabits, habits.length]);
+
 
     function addHabit(e: FormEvent) {
         e.preventDefault();

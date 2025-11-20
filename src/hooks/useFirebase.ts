@@ -22,14 +22,15 @@ export const useFirebase = (): UseFirebaseReturn => {
             const snap = await getDocs(collection(db, "todos"));
             const todos: Todo[] = snap.docs.map((doc) => {
                 const data = doc.data() as Todo;
+                console.log("doc:", doc.id, data);
                 return {
-                    id: data.id,                    // Firestore のフィールド id
+                    id: data.id,
                     text: data.text ?? "",
                     done: Boolean(data.done),
-                    // due が無い or 空なら undefined にしておく
                     due: data.due ? String(data.due) : undefined,
                 };
             });
+            console.log("fetchTodos result:", todos);
             return todos;
         } catch (e) {
             console.error("fetchTodos error", e);

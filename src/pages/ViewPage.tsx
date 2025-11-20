@@ -1,6 +1,7 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useAppStore } from "../app-store/context"; 
 import type { Todo, Habit } from "../types";
+import { useFirebase } from "../hooks/useFirebase";
 
 // ===== 日付ユーティリティ（YYYY-MM-DD 前提で安全に比較） =====
 function toYmd(d: Date) {
@@ -20,13 +21,31 @@ function todayYmd() {
 }
 
 export default function ViewPage() {
-    const { todos, habits } = useAppStore();
+    const { todos, setTodos, habits, setHabits } = useAppStore();
+
+    const { fetchTodos, fetchHabits } = useFirebase();
+
     const today = todayYmd();
     const until = addDaysYmd(today, 7); // 1週間先（今日から7日後）まで
     const last7 = useMemo(
         () => Array.from({ length: 7}, (_, i) => addDaysYmd(today, -i)),
         [today]
     );
+
+        // ★ 初回表示時に Firestore から todos / habits を読み込む
+    useEffect(() => {
+        const load = async () => {
+            const [todosData, habitsData] = await Promise.all([
+                fetchTodos(),
+                fetchHabits(),
+            ]);
+            setTodos(todosData);
+            setHabits(habitsData);
+        };
+
+        load();
+    }, [fetchTodos, fetchHabits, setTodos, setHabits]);
+
 
     // 期限切れタスク（未完了）を抽出して日付昇順→テキストで安定ソート
     const overdueTodos = useMemo(() => {

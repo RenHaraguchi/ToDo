@@ -5,7 +5,7 @@ import HabitsPage from './pages/HabitsPage';
 import ViewPage from './pages/ViewPage';
 
 export default function App(){
-  const [page, setPage] = useState<"tasks" | "habits" | "view">("tasks");
+  const [page, setPage] = useState<"tasks" | "habits" | "view">("view");
 
   return (
     <div className = "min-h-screen grid grid-cols-10 bg-white text-slate-900">
